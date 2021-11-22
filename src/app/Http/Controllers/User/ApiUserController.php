@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +14,16 @@ class ApiUserController extends Controller
 {
     public function register(ApiRegisterRequest $request)
     {
+        if($this->getUserByEmail($request->email) != null){
+            return response()->json([
+                'error' => 403,
+                'email' => ['Email exits']
+            ]);
+        }
         $user = new User;
         $user->fill($request->all());
         $user->password = Hash::make($request->password);
         $user->save();
-
         return response()->json($user);
     }
 
@@ -27,7 +33,7 @@ class ApiUserController extends Controller
             'email' => $request->email,
             'password' => $request->password
         ])){
-            $user = User::whereEmail($request->email)->first();
+            $user = $this->getUserByEmail($request->email);
             $user->token = $user->createToken('Token')->accessToken;
             return $user;
         }
@@ -40,5 +46,10 @@ class ApiUserController extends Controller
     public function userInfo(Request $request)
     {
         return response()->json($request->user('api'));
+    }
+
+    private function getUserByEmail($email)
+    {
+        return User::whereEmail($email)->first();
     }
 }

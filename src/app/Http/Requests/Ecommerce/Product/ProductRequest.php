@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Post;
+namespace App\Http\Requests\Ecommerce\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PostRequest extends FormRequest
+class ProductRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class PostRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,10 @@ class PostRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            "name" => "required",
+            "price" => "required|numeric|min:0|not_in:0",
+            "quantity" => "numeric|min:0|not_in:0",
+            "slug" => "required",
         ];
     }
 }

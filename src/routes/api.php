@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +13,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/register', 'ApiUserController@register');
-Route::post('/login', 'ApiUserController@login');
-Route::get('/user', 'ApiUserController@userInfo')->middleware('auth:api');
-Route::resource('/post', 'ApiPostController')->middleware('auth:api');
+// Route::resource('/product', 'Ecommerce\ApiProductController');
+Route::group(['prefix' => 'v1'], function () {
+
+    Route::group(['namespace'=>'User'],function (){
+        Route::post('/register', 'ApiUserController@register');
+        Route::post('/login', 'ApiUserController@login');
+    });
+
+    Route::group(['middleware' => ['admin']], function () {
+        Route::group(['namespace'=>'Ecommerce'],function (){
+            Route::post('/product', 'ApiProductController@store');
+            Route::delete('product/{id}', 'ApiProductController@destroy');
+            Route::patch('product/{id}', 'ApiProductController@update');
+        });
+    });
+
+    Route::group(['middleware' => ['user']], function () {
+        Route::get('/user', 'User\ApiUserController@userInfo');
+        Route::group(['namespace'=>'Ecommerce'],function (){
+            Route::get('/product', 'ApiProductController@index');
+            Route::get('product/{slug}', 'ApiProductController@show');
+        });
+    });
+
+});
